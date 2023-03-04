@@ -4,7 +4,7 @@ application when the project ``settings`` module does not contain
 the appropriate settings."""
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
-import collections
+import collections.abc
 
 url = 'http://packages.python.org/django-page-cms/settings-list.html#%s'
 
