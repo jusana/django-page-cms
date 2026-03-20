@@ -116,7 +116,7 @@ class FileInput(DFileInput):
 
     def render(self, name, value, attrs=None, **kwargs):
         if not self.page:
-            field_content = self.please_save_msg
+            return mark_safe(str(self.please_save_msg))
         else:
             field_content = '<span class="placeholder-fileinput">'
             if value:

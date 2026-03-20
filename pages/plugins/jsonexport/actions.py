@@ -2,7 +2,6 @@ from django.utils.translation import gettext_lazy as _
 from django.http import HttpResponse
 from django.db import transaction
 from django.shortcuts import render
-from django.template import RequestContext
 
 from pages.phttp import get_language_from_request
 from pages.plugins.jsonexport.utils import pages_to_json, json_to_pages
@@ -31,7 +30,7 @@ def import_pages_from_json(modeladmin, request, queryset,
             'nofile': True,
             'app_label': 'pages',
             'opts': Page._meta,
-        }, RequestContext(request))
+        })
 
     errors, pages_created = json_to_pages(j.read(), request.user,
         get_language_from_request(request))
@@ -41,6 +40,6 @@ def import_pages_from_json(modeladmin, request, queryset,
         'pages_created': pages_created,
         'app_label': 'pages',
         'opts': Page._meta,
-    }, RequestContext(request))
+    })
 
 import_pages_from_json.short_description = _("Import some pages from a JSON file")

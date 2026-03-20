@@ -85,13 +85,25 @@ def _placeholders_recursif(nodelist, plist, blist):
 
         # extends node?
         if hasattr(node, 'parent_name'):
-            # I do not know why I did this... but the tests are guarding it
-            # on considère que si le template termine par ".html" alors ce n'est PAS un template variable mais fixé
-            if node.parent_name.token.endswith(".html"):
-                dummy_context2 = Context()
-                dummy_context2.template = template.Template("")
+            # I do not know why I did this... but the tests are guarding it.
+            # jusana: We attempt to resolve the parent template using an empty context.
+            # If parent_name is a literal string (e.g. {% extends "base.html" %}),
+            # get_parent() succeeds and we recurse into the parent's nodelist to
+            # collect its placeholders.
+            # If parent_name is a template variable (e.g. {% extends my_var %}),
+            # the variable resolves to '' in the empty context, causing
+            # get_parent() to raise TemplateSyntaxError. We catch it silently:
+            # placeholders declared in the child's own block overrides are still
+            # found by the nodelist loop below, but any placeholders that exist
+            # only in the parent template and are not overridden by the child
+            # will be missed — an unavoidable limitation of static analysis.
+            dummy_context2 = Context()
+            dummy_context2.template = template.Template("")
+            try:
                 _placeholders_recursif(node.get_parent(dummy_context2).nodelist,
                                     plist, blist)
+            except Exception:
+                pass
         # include node?
         elif hasattr(node, 'template') and hasattr(node.template, 'nodelist'):
             _placeholders_recursif(node.template.nodelist, plist, blist)
@@ -148,8 +160,8 @@ def slugify(value, allow_unicode=False):
     value = force_str(value)
     if allow_unicode:
         value = unicodedata.normalize('NFKC', value)
-        value = re.sub('[^\w\s-]', '', value, flags=re.U).strip().lower()
-        return mark_safe(re.sub('[-\s]+', '-', value, flags=re.U))
+        value = re.sub(r'[^\w\s-]', '', value, flags=re.U).strip().lower()
+        return mark_safe(re.sub(r'[-\s]+', '-', value, flags=re.U))
     value = unicodedata.normalize('NFKD', value).encode('ascii', 'ignore').decode('ascii')
-    value = re.sub('[^\w\s-]', '', value).strip().lower()
-    return mark_safe(re.sub('[-\s]+', '-', value))
+    value = re.sub(r'[^\w\s-]', '', value).strip().lower()
+    return mark_safe(re.sub(r'[-\s]+', '-', value))

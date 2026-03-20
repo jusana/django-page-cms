@@ -272,6 +272,25 @@ class RegressionTestCase(TestCase):
             str(get_placeholders('pages/tests/extends.html')),
             '[<Placeholder Node: one>, <Placeholder Node: two>]')
 
+    def test_placeholder_bug_variable_extends(self):
+        """get_placeholders must not crash and must find placeholders when
+        {% extends variable %} is used (parent cannot be resolved statically).
+        """
+        p1 = self.new_page(content={'slug': 'test', 'one': 'one', 'two': 'two'})
+        # render: pass base_template in context so Django can resolve the extends
+        tpl = django.template.loader.get_template('pages/tests/extends_var.html')
+        context = {'current_page': p1, 'lang': 'en', 'base_template': 'pages/tests/base.html'}
+        renderer = tpl.render(context)
+        self.assertTrue('one' in renderer)
+        self.assertTrue('two' in renderer)
+
+        # get_placeholders: parent_name is a variable → skip parent, but child
+        # block overrides still contain the placeholders
+        from pages.utils import get_placeholders
+        self.assertEqual(
+            str(get_placeholders('pages/tests/extends_var.html')),
+            '[<Placeholder Node: one>, <Placeholder Node: two>]')
+
     def test_param_position(self):
         """There was a typo in the change_form.html"""
         c = self.get_admin_client()

@@ -12,7 +12,7 @@ from django.core.servers.basehttp import WSGIServer
 class LiveServerSingleThread(LiveServerThread):
     """Runs a single threaded server rather than multi threaded. Reverts https://github.com/django/django/pull/7832"""
 
-    def _create_server(self):
+    def _create_server(self, **kwargs):
         return WSGIServer((self.host, self.port), QuietWSGIRequestHandler, allow_reuse_address=False)
 
 

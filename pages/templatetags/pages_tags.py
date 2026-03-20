@@ -9,7 +9,7 @@ from django.template.loader import get_template
 try:
     from django.templatetags.static import static
 except ImportError:
-    from django.contrib.staticfiles.templatetags.staticfiles import static
+    from django.templatetags.static import static
 
 from pages import settings as pages_settings
 from pages.models import Content, Page

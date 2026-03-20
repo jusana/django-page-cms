@@ -85,29 +85,30 @@ class PageAdmin(admin.ModelAdmin):
 
     def get_urls(self):
         urls = super(PageAdmin, self).get_urls()
+        from django.urls import path
         from django.urls import re_path
 
         pages_urls = [
-            re_path(r'^$', self.list_pages, name='page-changelist'),
+            path('', self.list_pages, name='page-changelist'),
             re_path(r'^(?P<page_id>[0-9]+)/traduction/(?P<language_id>[-\w]+)/$',
                 views.traduction, name='page-traduction'),
-            re_path(r'^(?P<page_id>[0-9]+)/get-content/(?P<content_id>[0-9]+)/$',
+            path('<int:page_id>/get-content/<int:content_id>/',
                 views.get_content, name='page-get-content'),
             re_path(r'^(?P<page_id>[0-9]+)/modify-content/(?P<content_type>[-\w]+)/(?P<language_id>[-\w]+)/$',
                 views.modify_content, name='page-modify-content'),
-            re_path(r'^(?P<page_id>[0-9]+)/modify-placeholder/$',
+            path('<int:page_id>/modify-placeholder/',
                 views.modify_placeholder, name='page-modify-placeholder'),
-            re_path(r'^(?P<page_id>[0-9]+)/get-last-content/$',
+            path('<int:page_id>/get-last-content/',
                 views.get_last_content, name='page-get-last-content'),
             re_path(r'^(?P<page_id>[0-9]+)/delete-content/(?P<language_id>[-\w]+)/$',
                 views.delete_content, name='page-delete-content'),
-            re_path(r'^(?P<page_id>[0-9]+)/sub-menu/$',
+            path('<int:page_id>/sub-menu/',
                 views.sub_menu, name='page-sub-menu'),
-            re_path(r'^(?P<page_id>[0-9]+)/move-page/$',
+            path('<int:page_id>/move-page/',
                 views.move_page, name='page-move-page'),
-            re_path(r'^(?P<page_id>[0-9]+)/change-status/$',
+            path('<int:page_id>/change-status/',
                 views.change_status, name='page-change-status'),
-            re_path(r'^(?P<media_id>[0-9]+)/media-url/$',
+            path('<int:media_id>/media-url/',
                 views.get_media_url, name='get-media-url'),
         ]
 
@@ -347,7 +348,7 @@ except AlreadyRegistered:
     pass
 
 class ContentAdmin(admin.ModelAdmin):
-    list_display = ('__unicode__', 'type', 'language', 'page')
+    list_display = ('__str__', 'type', 'language', 'page')
     list_filter = ('page',)
     search_fields = ('body',)
 

@@ -17,7 +17,6 @@ from django.utils.translation import gettext_lazy as _
 from django.utils.safestring import mark_safe
 from django.utils.text import unescape_string_literal
 from django.template.loader import render_to_string
-from django.template import RequestContext
 from django.core.files.uploadedfile import UploadedFile
 import logging
 import os
@@ -420,7 +419,7 @@ class ContactPlaceholderNode(PlaceholderNode):
         else:
             form = ContactForm()
         renderer = render_to_string(
-            'pages/contact.html', {'form': form}, RequestContext(request))
+            'pages/contact.html', {'form': form}, request=request)
         return mark_safe(renderer)
 
 

@@ -505,18 +505,16 @@ class FunctionnalTestCase(TestCase):
 
         root_page = Content.objects.get_content_slug_by_slug('root').page
         self.assertEqual(len(root_page.valid_targets()), 0)
-        self.assertQuerysetEqual(c1.valid_targets(), ['<Page: root>'])
+        self.assertQuerySetEqual(c1.valid_targets(), ['<Page: root>'], transform=repr)
 
     def test_ajax_language(self):
         """Test that language is working properly"""
         c = self.get_admin_client()
         # Activate a language other than settings.LANGUAGE_CODE
         response = c.post('/i18n/setlang/', {'language':'fr' })
-        try:
-            from django.utils.translation import LANGUAGE_SESSION_KEY
-        except ImportError:
-            LANGUAGE_SESSION_KEY = 'django_language'
-        self.assertEqual(c.session.get(LANGUAGE_SESSION_KEY, False), 'fr')
+        # Django 5.0+ stores language preference in cookie, not session
+        self.assertEqual(c.cookies.get('django_language', None) and
+                         c.cookies['django_language'].value, 'fr')
 
         # Make sure we're in french
         response = c.get(changelist_url)
@@ -541,8 +539,8 @@ class FunctionnalTestCase(TestCase):
 
         child_2 = Content.objects.get_content_slug_by_slug('child-2').page
 
-        self.assertQuerysetEqual(Page.objects.all(),
-            ['<Page: root>', '<Page: child-2>', '<Page: child-1>'])
+        self.assertQuerySetEqual(Page.objects.all(),
+            ['<Page: root>', '<Page: child-2>', '<Page: child-1>'], transform=repr)
 
         """
         The relevant bit, fixed by rev 501: the response issued by a move
@@ -614,23 +612,23 @@ class FunctionnalTestCase(TestCase):
 
         child_2 = Content.objects.get_content_slug_by_slug('child-2').page
 
-        self.assertQuerysetEqual(Page.objects.all(),
-            ['<Page: root>', '<Page: child-2>', '<Page: child-1>'])
+        self.assertQuerySetEqual(Page.objects.all(),
+            ['<Page: root>', '<Page: child-2>', '<Page: child-1>'], transform=repr)
         # move page 1 in the first position
         move_url = reverse("admin:page-move-page", args=[child_1.id])
         response = c.post(move_url,
             {'position':'first-child', 'target':root_page.id})
 
-        self.assertQuerysetEqual(Page.objects.all(),
-            ['<Page: root>', '<Page: child-1>', '<Page: child-2>'])
+        self.assertQuerySetEqual(Page.objects.all(),
+            ['<Page: root>', '<Page: child-1>', '<Page: child-2>'], transform=repr)
 
         # move page 2 in the first position
         move_url = reverse("admin:page-move-page", args=[child_2.id])
         response = c.post(move_url, 
             {'position': 'left', 'target': child_1.id})
 
-        self.assertQuerysetEqual(Page.objects.all(),
-            ['<Page: root>', '<Page: child-2>', '<Page: child-1>'])
+        self.assertQuerySetEqual(Page.objects.all(),
+            ['<Page: root>', '<Page: child-2>', '<Page: child-1>'], transform=repr)
 
         # try to create a sibling with the same slug, via left, right
         from pages import settings as pages_settings
@@ -682,8 +680,8 @@ class FunctionnalTestCase(TestCase):
         response = c.post(add_url, page_data)
         page_data['slug'] = 'page3'
         response = c.post(add_url, page_data)
-        self.assertQuerysetEqual(Page.objects.navigation(),
-            ['<Page: page1>', '<Page: page2>', '<Page: page3>'])
+        self.assertQuerySetEqual(Page.objects.navigation(),
+            ['<Page: page1>', '<Page: page2>', '<Page: page3>'], transform=repr)
 
         p1 = Content.objects.get_content_slug_by_slug('page1').page
         p2 = Content.objects.get_content_slug_by_slug('page2').page
@@ -692,14 +690,14 @@ class FunctionnalTestCase(TestCase):
         p2.move_to(p1, 'left')
         p2.save()
 
-        self.assertQuerysetEqual(Page.objects.navigation(),
-            ['<Page: page2>', '<Page: page1>', '<Page: page3>'])
+        self.assertQuerySetEqual(Page.objects.navigation(),
+            ['<Page: page2>', '<Page: page1>', '<Page: page3>'], transform=repr)
 
         p3.move_to(p2, 'left')
         p3.save()
 
-        self.assertQuerysetEqual(Page.objects.navigation(),
-            ['<Page: page3>', '<Page: page2>', '<Page: page1>'])
+        self.assertQuerySetEqual(Page.objects.navigation(),
+            ['<Page: page3>', '<Page: page2>', '<Page: page1>'], transform=repr)
 
         p1 = Content.objects.get_content_slug_by_slug('page1').page
         p2 = Content.objects.get_content_slug_by_slug('page2').page
@@ -708,14 +706,14 @@ class FunctionnalTestCase(TestCase):
         p3.move_to(p1, 'first-child')
         p2.move_to(p1, 'first-child')
 
-        self.assertQuerysetEqual(Page.objects.navigation(),
-            ['<Page: page1>'])
+        self.assertQuerySetEqual(Page.objects.navigation(),
+            ['<Page: page1>'], transform=repr)
 
         p3 = Content.objects.get_content_slug_by_slug('page3').page
         p3.move_to(p1, 'left')
 
-        self.assertQuerysetEqual(Page.objects.navigation(),
-            ['<Page: page3>', '<Page: page1>'])
+        self.assertQuerySetEqual(Page.objects.navigation(),
+            ['<Page: page3>', '<Page: page1>'], transform=repr)
 
     def test_page_redirect_to_url(self):
         """Test page redirected to external url."""

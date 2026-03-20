@@ -7,6 +7,7 @@ TEST_PROJ = 'pages.testproj'
 
 DEBUG = True
 USE_TZ = True
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 ADMINS = (
     # ('Your Name', 'your_email@domain.com'),
@@ -187,7 +188,7 @@ COVERAGE_BRANCH_COVERAGE = False
 PAGE_ENABLE_TESTS = True
 
 PASSWORD_HASHERS = [
-    'django.contrib.auth.hashers.SHA1PasswordHasher'
+    'django.contrib.auth.hashers.MD5PasswordHasher'
 ]
 
 try:
